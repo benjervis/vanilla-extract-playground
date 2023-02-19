@@ -49,12 +49,14 @@ export const ButtonLink = ({
   if (typeof to === 'string' && /^http/.test(to)) {
     return (
       <a href={to} className={classNames}>
-        {children}
-        {icon ? (
-          <Box display="inline" paddingLeft="small">
-            {icon}
-          </Box>
-        ) : undefined}
+        <>
+          {children}
+          {icon ? (
+            <Box display="inline" paddingLeft="small">
+              {icon}
+            </Box>
+          ) : undefined}
+        </>
       </a>
     );
   }
@@ -62,24 +64,28 @@ export const ButtonLink = ({
   if (typeof to === 'string' && to.indexOf('#') > -1) {
     return (
       <HashLink to={to} className={classNames}>
-        {children}
-        {icon ? (
-          <Box display="inline" paddingLeft="small">
-            {icon}
-          </Box>
-        ) : undefined}
+        <>
+          {children}
+          {icon ? (
+            <Box display="inline" paddingLeft="small">
+              {icon}
+            </Box>
+          ) : undefined}
+        </>
       </HashLink>
     );
   }
 
   return (
     <Link onClick={() => window.scrollTo(0, 0)} to={to} className={classNames}>
-      {children}
-      {icon ? (
-        <Box display="inline" paddingLeft="xsmall">
-          {icon}
-        </Box>
-      ) : undefined}
+      <>
+        {children}
+        {icon ? (
+          <Box display="inline" paddingLeft="xsmall">
+            {icon}
+          </Box>
+        ) : undefined}
+      </>
     </Link>
   );
 };

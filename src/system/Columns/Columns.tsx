@@ -9,7 +9,7 @@ import { mapResponsiveValue } from '../styles/sprinkles.css';
 interface Props {
   children: ReactNode;
   space: Space;
-  alignY?: ResponsiveValue<'top' | 'center' | 'bottom'>;
+  alignY?: ResponsiveValue<'top' | 'center' | 'bottom' | 'stretch'>;
   reverseX?: boolean;
   collapseOnMobile?: boolean;
   collapseOnTablet?: boolean;
@@ -19,6 +19,7 @@ const alignYToFlexAlign = {
   top: 'flex-start',
   bottom: 'flex-end',
   center: 'center',
+  stretch: 'stretch',
 } as const;
 
 const negate = (space: Space) =>
