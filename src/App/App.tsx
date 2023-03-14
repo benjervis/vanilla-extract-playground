@@ -29,8 +29,8 @@ export const App = () => (
         <Box flexGrow={1} id="growbox-1" display="flex">
           <Playground />
         </Box>
+        <Box paddingBottom="medium" flexGrow={0} />
       </Box>
-      <Box paddingBottom="medium" flexGrow={0} />
     </ContentBlock>
   </ColorModeProvider>
 );
