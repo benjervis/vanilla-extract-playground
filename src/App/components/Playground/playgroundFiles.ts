@@ -1,5 +1,7 @@
 import type { FileSystemTree } from '@webcontainer/api';
 
+import { lockfile } from './playground-lockfile';
+
 export const files = {
   'build.js': {
     file: {
@@ -45,6 +47,11 @@ export const testStyle = style({
     "start": "node build.js"
   }
 }`,
+    },
+  },
+  'pnpm-lock.yaml': {
+    file: {
+      contents: lockfile,
     },
   },
 } satisfies FileSystemTree;

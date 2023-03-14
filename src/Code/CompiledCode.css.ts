@@ -23,11 +23,6 @@ export const root = style([
       zIndex: -1,
       transform: 'skewX(-1deg) skewY(0.75deg)',
     },
-    selectors: {
-      [`.${darkMode} &::before`]: {
-        background: fallbackVar(darkModeBg, vars.palette.gray900),
-      },
-    },
   },
 ]);
 

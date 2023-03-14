@@ -3,14 +3,15 @@ import { githubDark } from '@uiw/codemirror-theme-github';
 import CodeMirror from '@uiw/react-codemirror';
 import { WebContainer } from '@webcontainer/api';
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { CompiledCode } from '../../../Code/CompiledCode';
-import { Heading } from '../../../Typography/Heading';
-import Text from '../../../Typography/Text';
-import { Columns, Stack } from '../../../system';
+import { CompiledCode } from '@/Code/CompiledCode';
+import { Box } from '@/system';
 
+import { PlaygroundLoader } from './components/PlaygroundLoader/PlaygroundLoader';
 import { files } from './playgroundFiles';
+
+import * as styles from './Playground.css';
 
 async function installDependencies(webcontainer: WebContainer) {
   // Install dependencies
@@ -19,6 +20,7 @@ async function installDependencies(webcontainer: WebContainer) {
   installProcess.output.pipeTo(
     new WritableStream({
       write(data) {
+        // eslint-disable-next-line no-console
         console.log(data);
       },
     }),
@@ -34,6 +36,7 @@ const bootstrapWebcontainer = async () => {
 
   const installExitCode = await installDependencies(instance);
   if (installExitCode !== 0) {
+    // eslint-disable-next-line no-console
     console.log('Error installing deps');
     return;
   }
@@ -46,6 +49,7 @@ const runBuild = async (webcontainer: WebContainer) => {
   buildProcess.output.pipeTo(
     new WritableStream({
       write(data) {
+        // eslint-disable-next-line no-console
         console.log('[build]:', data);
       },
     }),
@@ -56,6 +60,7 @@ const runBuild = async (webcontainer: WebContainer) => {
 const buildAndUpdate = async (webcontainer: WebContainer) => {
   const buildExitCode = await runBuild(webcontainer);
   if (buildExitCode !== 0) {
+    // eslint-disable-next-line no-console
     console.log('Build failed');
     return;
   }
@@ -64,10 +69,13 @@ const buildAndUpdate = async (webcontainer: WebContainer) => {
   //   encoding: 'utf-8',
   // });
 
-  const cssContent = await webcontainer.fs.readFile(
+  const rawCssContent = await webcontainer.fs.readFile(
     'dist/styles.css.css',
     'utf-8',
   );
+
+  // Remove the comments that esbuild adds to the bundle
+  const cssContent = rawCssContent.replace(/^\/\*.*\*\/\n?/, '');
 
   return cssContent;
 };
@@ -91,11 +99,11 @@ export const Playground = () => {
     });
   }, []);
 
-  if (!webcontainer) {
-    return <Text>Loading web container...</Text>;
-  }
-
   const handleCodeChange = async (content: string) => {
+    if (!webcontainer) {
+      return;
+    }
+
     setFileContents(content);
     await webcontainer.fs.writeFile('styles.css.ts', content);
     const css = await buildAndUpdate(webcontainer);
@@ -107,41 +115,43 @@ export const Playground = () => {
   const debouncedChangeHandler = debounce(handleCodeChange, 500);
 
   return (
-    <Columns space="medium" alignY="stretch">
-      <Stack space="large">
-        <Heading level="4">Vanilla Extract</Heading>
+    <Box display="flex" alignItems="stretch" flexGrow={1}>
+      <Box
+        style={{ width: '100%', minWidth: 0 }}
+        display="flex"
+        alignItems="stretch"
+        flexDirection="column"
+      >
         <CodeMirror
           value={fileContents}
-          height="600px"
+          className={styles.codemirrorEditor}
+          height="100%"
           theme={githubDark}
           extensions={[javascript({ typescript: true })]}
           onChange={debouncedChangeHandler}
         />
-      </Stack>
-
-      <Stack space="large">
-        <Heading level="4">Compiled CSS</Heading>
-        <CompiledCode
-          code={[
-            {
-              fileName: 'styles.css',
-              contents: cssContents,
-            },
-          ]}
-          css={{
-            'styles.css': cssContents,
-          }}
-        />
-        {/* <CodeMirror
-          value={cssContents}
-          height="600px"
-          theme={githubDark}
-          readOnly
-          editable={false}
-          basicSetup={{ highlightActiveLine: false }}
-          extensions={[javascript({ typescript: true })]}
-        /> */}
-      </Stack>
-    </Columns>
+      </Box>
+      <Box
+        className={styles.compiledCodeBackground}
+        style={{ width: '100%', minWidth: 0 }}
+        marginLeft="medium"
+      >
+        {webcontainer && cssContents ? (
+          <CompiledCode
+            code={[
+              {
+                fileName: 'styles.css',
+                contents: cssContents,
+              },
+            ]}
+            css={{
+              'styles.css': cssContents,
+            }}
+          />
+        ) : (
+          <PlaygroundLoader />
+        )}
+      </Box>
+    </Box>
   );
 };
